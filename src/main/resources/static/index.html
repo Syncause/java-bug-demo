@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syncause Challenge Dashboard</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --border: #334155;
+            --red: #ef4444;
+            --orange: #f59e0b;
+            --green: #22c55e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 40px 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .header .sub-hint {
+            font-size: 0.9rem;
+            color: #475569;
+            margin-top: 10px;
+        }
+
+        /* GRID */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 25px;
+        }
+
+        /* CARD */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent);
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        /* AI PREDICTION BOX */
+        .ai-box {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid var(--accent);
+            padding: 12px 15px;
+            border-radius: 0 4px 4px 0;
+            font-size: 0.9rem;
+            color: #bfdbfe;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .ai-box strong {
+            font-style: normal;
+            opacity: 0.8;
+            font-size: 0.8rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* BUTTON */
+        .action-area {
+            margin-top: auto;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            background: #fff;
+            color: #0f172a;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            background: #cbd5e1;
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* RESULT BOX */
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: "JetBrains Mono", Consolas, monospace;
+            font-size: 0.85rem;
+            display: none;
+            word-break: break-all;
+            animation: fadeIn 0.3s;
+        }
+
+        /* Result Variants */
+        .res-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .res-breach {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #fcd34d;
+            position: relative;
+        }
+
+        .res-breach::before {
+            content: "⚠️ SECURITY BREACH";
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            background: var(--orange);
+            color: #000;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>The Unfixable App</h1>
+            <p>6 Perfect Code Snippets vs. 6 Hidden Runtime Traps</p>
+            <div class="sub-hint">Use Syncause to see the invisible.</div>
+        </div>
+
+        <div class="grid">
+
+            <!-- SCENARIO 1: COMPOSITE LOGIC -->
+            <div class="card">
+                <span class="tag">01. Composite Logic</span>
+                <h3>Validate Coupon</h3>
+                <div class="ai-box">
+                    <strong>🤖 AI Prediction</strong>
+                    "Logic checks Status, Date, Amount & Category correctly. Code is flawless."
+                </div>
+                <div class="action-area">
+                    <button onclick="run(this, '/api/apply-coupon?code=SUMMER_2024&category=FOOD&amount=100')">
+                        Run Test (Valid Inputs)
+                    </button>
+                    <div class="result"></div>
+                </div>
+            </div>
+
+            <!-- SCENARIO 2: CONFIG TRAP -->
+            <div class="card">
+                <span class="tag">02. Config Trap</span>
+                <h3>Create Order</h3>
+                <div class="ai-box">
+                    <strong>🤖 AI Prediction</strong>
+                    "Reads config, regex validates format. Standard implementation."
+                </div>
+                <div class="action-area">
+                    <button onclick="run(this, '/api/create-order?userId=123')">
+                        Run Order #123
+                    </button>
+                    <div class="result"></div>
+                </div>
+            </div>
+
+            <!-- SCENARIO 3: SCHEMA DRIFT -->
+            <div class="card">
+                <span class="tag">03. API Schema</span>
+                <h3>Login User</h3>
+                <div class="ai-box">
+                    <strong>🤖 AI Prediction</strong>
+                    "Checks 'isBanned' flag. If true, returns 403. Security logic is solid."
+                </div>
+                <div class="action-area">
+                    <button onclick="run(this, '/api/login?userId=u_992')">
+                        Login 'u_992' (Banned)
+                    </button>
+                    <div class="result"></div>
+                </div>
+            </div>
+
+            <!-- SCENARIO 4: JACKSON SERIALIZATION -->
+            <div class="card">
+                <span class="tag">04. Serialization</span>
+                <h3>Check VIP Status</h3>
+                <div class="ai-box">
+                    <strong>🤖 AI Prediction</strong>
+                    "JSON has 'isVIP: true'. Java object has boolean 'isVIP'. Should Map."
+                </div>
+                <div class="action-area">
+                    <button onclick="run(this, '/api/check-vip')">
+                        Run VIP Check
+                    </button>
+                    <div class="result"></div>
+                </div>
+            </div>
+
+            <!-- SCENARIO 5: LOCALE BOMB -->
+            <div class="card">
+                <span class="tag">05. Environment</span>
+                <h3>Generate Report</h3>
+                <div class="ai-box">
+                    <strong>🤖 AI Prediction</strong>
+                    "String.format('%.2f') produces standard float string. No risk."
+                </div>
+                <div class="action-area">
+                    <button onclick="run(this, '/api/generate-report?amount=50.5')">
+                        Format Amount 50.5
+                    </button>
+                    <div class="result"></div>
+                </div>
+            </div>
+
+            <!-- SCENARIO 6: PROXY HIJACK -->
+            <div class="card">
+                <span class="tag">06. Memory/AOP</span>
+                <h3>Bank Transfer</h3>
+                <div class="ai-box">
+                    <strong>🤖 AI Prediction</strong>
+                    "Service implementation explicitly returns 1000. Balance check passes."
+                </div>
+                <div class="action-area">
+                    <button onclick="run(this, '/api/bank-transfer')">
+                        Transfer Money
+                    </button>
+                    <div class="result"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        async function run(btn, url) {
+            const resultBox = btn.nextElementSibling;
+
+            // UI Loading State
+            btn.disabled = true;
+            const originalBtnText = btn.innerHTML;
+            btn.innerHTML = '<div class="spinner"></div> Running...';
+
+            resultBox.style.display = 'none';
+            resultBox.className = 'result'; // reset classes
+
+            try {
+                // Add a small artificial delay for dramatic effect (optional)
+                await new Promise(r => setTimeout(r, 400));
+
+                const response = await fetch(url);
+                const text = await response.text();
+
+                resultBox.style.display = 'block';
+
+                // Logic to determine result style
+                if (!response.ok) {
+                    // 500 Errors (Crash)
+                    resultBox.className = 'result res-error';
+
+                    // If it's a giant Spring Boot error page, cut it short
+                    let displayMsg = text;
+                    try {
+                        const json = JSON.parse(text);
+                        displayMsg = json.message || json.error || text;
+                    } catch (e) { }
+
+                    if (displayMsg.includes("<html>")) displayMsg = "500 Internal Server Error (See Console)";
+
+                    resultBox.innerHTML = `🔥 <b>CRASHED:</b><br>${displayMsg}`;
+
+                } else if (text.includes("Failure") || text.includes("Error") || text.includes("Denied")) {
+                    // 200 OK but Logic Failure
+                    resultBox.className = 'result res-error';
+                    resultBox.innerHTML = `❌ <b>LOGIC FAIL:</b><br>${text}`;
+
+                } else if (text.includes("Security Breach")) {
+                    // 200 OK but Security Issue (Scenario 3)
+                    resultBox.className = 'result res-breach';
+                    resultBox.innerHTML = `😱 <b>SILENT BUG:</b><br>${text}<br><br><small>User should have been blocked!</small>`;
+
+                } else {
+                    // Actual Success (Should not happen in this demo usually)
+                    resultBox.style.color = "#22c55e";
+                    resultBox.innerHTML = `✅ ${text}`;
+                }
+
+            } catch (err) {
+                resultBox.style.display = 'block';
+                resultBox.className = 'result res-error';
+                resultBox.innerHTML = "🚫 Network Connection Error";
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalBtnText;
+            }
+        }
+    </script>
+
+</body>
+
+</html>

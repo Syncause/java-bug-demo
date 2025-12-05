@@ -1,0 +1,10 @@
+.settings/
+.project
+.classpath
+.vscode/
+target/
+dependency-reduced-pom.xml
+build/
+*.log
+.DS_Store
+demo_db.trace.db
